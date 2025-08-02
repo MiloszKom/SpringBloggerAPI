@@ -1,5 +1,6 @@
 package com.example.SpringBloggerAPI.exception.handler;
 
+import com.example.SpringBloggerAPI.exception.types.PermissionDeniedException;
 import com.example.SpringBloggerAPI.exception.types.ErrorResponse;
 import com.example.SpringBloggerAPI.exception.types.PostNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -33,5 +34,11 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidPostId(PostNotFoundException ex) {
         ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PermissionDeniedException.class)
+    public  ResponseEntity<ErrorResponse> handlePermissionDenied(PermissionDeniedException ex) {
+        ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.FORBIDDEN.value());
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 }

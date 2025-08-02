@@ -2,7 +2,8 @@ package com.example.SpringBloggerAPI.post;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PostRepository extends JpaRepository<Post, Integer> {
+import java.util.Optional;
 
-    Post findByPostId(int id);
+public interface PostRepository extends JpaRepository<Post, Integer> {
+    Optional<Post> findById(int id);
 }

@@ -1,7 +1,10 @@
 package com.example.SpringBloggerAPI.post;
 
+import com.example.SpringBloggerAPI.auth.AuthService;
+import com.example.SpringBloggerAPI.exception.types.PermissionDeniedException;
 import com.example.SpringBloggerAPI.exception.types.PostNotFoundException;
 import com.example.SpringBloggerAPI.post.dto.PostRequest;
+import com.example.SpringBloggerAPI.user.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,13 +13,20 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository repository;
+    private final AuthService authService;
 
-    public PostService(PostRepository repository) {
+    public PostService(PostRepository repository, AuthService authService) {
         this.repository = repository;
+        this.authService = authService;
     }
 
     public Post savePost(PostRequest postRequest) {
-        Post post = new Post(0, postRequest.getTitle(), postRequest.getContent());
+        User user = authService.getCurrentUser();
+        Post post = new Post();
+        post.setTitle(postRequest.getTitle());
+        post.setContent(postRequest.getContent());
+        post.setUser(user);
+
         return repository.save(post);
     }
 
@@ -31,8 +41,9 @@ public class PostService {
 
     public Post updatePost(int id, PostRequest postRequest){
         Post existingPost = getPost(id);
-        if (existingPost == null) {
-            throw new PostNotFoundException("Post not found with id: " + id);
+        User current = authService.getCurrentUser();
+        if (existingPost.getUser() == null || existingPost.getUser().getId() != current.getId()) {
+            throw new PermissionDeniedException("You are not the owner of this post");
         }
 
         existingPost.setTitle(postRequest.getTitle());
@@ -41,9 +52,11 @@ public class PostService {
     }
 
     public void deletePost(int id) {
-        if (!repository.existsById(id)) {
-            throw new PostNotFoundException("Post not found with id: " + id);
+        Post existingPost = getPost(id);
+        User current = authService.getCurrentUser();
+        if (existingPost.getUser() == null || existingPost.getUser().getId() != current.getId()) {
+            throw new PermissionDeniedException("You are not the owner of this post");
         }
-        repository.deleteById(id);
+        repository.delete(existingPost);
     }
 }

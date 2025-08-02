@@ -1,6 +1,8 @@
 package com.example.SpringBloggerAPI.post;
 
 import com.example.SpringBloggerAPI.user.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -8,25 +10,27 @@ import jakarta.persistence.*;
 public class Post {
 
     @Id
-    @GeneratedValue
-    private int postId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
     private String title;
     private String content;
 
-//    @ManyToOne
-//    @JoinColumn(name = "user_id", nullable = false) // FK column
-//    private User user;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
+    private User user;
 
     public Post() {}
 
-    public Post(int postId, String title, String content) {
-        this.postId = postId;
+    public Post(String title, String content, User user) {
         this.title = title;
         this.content = content;
+        this.user = user;
     }
 
-    public int getPostId() {
-        return postId;
+    public int getId() {
+        return id;
     }
 
     public String getTitle() {
@@ -43,5 +47,13 @@ public class Post {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

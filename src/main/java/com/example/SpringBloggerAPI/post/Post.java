@@ -1,9 +1,7 @@
 package com.example.SpringBloggerAPI.post;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.example.SpringBloggerAPI.user.User;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "POSTS_TBL")
@@ -14,6 +12,10 @@ public class Post {
     private int postId;
     private String title;
     private String content;
+
+//    @ManyToOne
+//    @JoinColumn(name = "user_id", nullable = false) // FK column
+//    private User user;
 
     public Post() {}
 

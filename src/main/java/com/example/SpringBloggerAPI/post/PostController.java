@@ -1,9 +1,7 @@
 package com.example.SpringBloggerAPI.post;
 
-import com.example.SpringBloggerAPI.exception.PostNotFoundException;
 import com.example.SpringBloggerAPI.post.dto.PostRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +16,7 @@ public class PostController {
 
     public PostController(PostService service) {
         this.service = service;
-    }
+   }
 
     @GetMapping
     public ResponseEntity<List<Post>> getAllPosts() {

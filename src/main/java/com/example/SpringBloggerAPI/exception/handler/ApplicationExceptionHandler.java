@@ -1,7 +1,7 @@
-package com.example.SpringBloggerAPI.advice;
+package com.example.SpringBloggerAPI.exception.handler;
 
-import com.example.SpringBloggerAPI.exception.ErrorResponse;
-import com.example.SpringBloggerAPI.exception.PostNotFoundException;
+import com.example.SpringBloggerAPI.exception.types.ErrorResponse;
+import com.example.SpringBloggerAPI.exception.types.PostNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

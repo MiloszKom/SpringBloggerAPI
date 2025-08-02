@@ -1,8 +1,7 @@
 package com.example.SpringBloggerAPI.post;
 
-import com.example.SpringBloggerAPI.exception.PostNotFoundException;
+import com.example.SpringBloggerAPI.exception.types.PostNotFoundException;
 import com.example.SpringBloggerAPI.post.dto.PostRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

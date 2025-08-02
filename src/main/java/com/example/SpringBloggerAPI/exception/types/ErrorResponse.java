@@ -1,4 +1,4 @@
-package com.example.SpringBloggerAPI.exception;
+package com.example.SpringBloggerAPI.exception.types;
 
 public class ErrorResponse {
     private final String message;

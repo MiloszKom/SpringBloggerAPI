@@ -1,6 +1,7 @@
 package com.example.SpringBloggerAPI.post;
 
 import com.example.SpringBloggerAPI.post.dto.PostRequest;
+import com.example.SpringBloggerAPI.post.dto.PostResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,24 +20,25 @@ public class PostController {
    }
 
     @GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
-        return ResponseEntity.ok(service.getAllPosts());
+    public ResponseEntity<List<PostResponse>> getAllPosts() {
+        List<PostResponse> posts = service.getAllPosts();
+        return ResponseEntity.ok(posts);
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Post savePost(@Valid @RequestBody PostRequest postRequest) {
-        return service.savePost(postRequest);
+    public ResponseEntity<PostResponse> savePost(@Valid @RequestBody PostRequest postRequest) {
+        PostResponse response = service.savePost(postRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Post> gettingPost(@PathVariable int id) {
-        return ResponseEntity.ok(service.getPost(id));
+    public ResponseEntity<PostResponse> gettingPost(@PathVariable int id) {
+        return ResponseEntity.ok(service.getSinglePost(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable int id, @Valid @RequestBody PostRequest postRequest) {
-        Post updatedPost = service.updatePost(id, postRequest);
+    public ResponseEntity<PostResponse> updatePost(@PathVariable int id, @Valid @RequestBody PostRequest postRequest) {
+        PostResponse updatedPost = service.updatePost(id, postRequest);
         return ResponseEntity.ok(updatedPost);
     }
 

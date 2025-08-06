@@ -16,5 +16,4 @@ public class PostRequest {
     public String getContent() {
         return content;
     }
-
 }

@@ -1,4 +1,6 @@
 package com.example.SpringBloggerAPI.user;
+import com.example.SpringBloggerAPI.user.dto.UserSummary;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -7,15 +9,16 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final UserRepository userRepository;
+    private final UserService service;
 
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserController(UserService service) {
+        this.service = service;
     }
 
     @GetMapping
-    public List<User> getUsers() {
-        return userRepository.findAll();
+    public ResponseEntity<List<UserSummary>> getUsers() {
+        List<UserSummary> users = service.findAll();
+        return ResponseEntity.ok(users);
     }
 
 }

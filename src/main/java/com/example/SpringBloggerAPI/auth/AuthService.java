@@ -1,8 +1,9 @@
 package com.example.SpringBloggerAPI.auth;
 
-import com.example.SpringBloggerAPI.auth.dto.AuthRequest;
+import com.example.SpringBloggerAPI.auth.dto.LoginRequest;
 import com.example.SpringBloggerAPI.auth.dto.AuthResponse;
 import com.example.SpringBloggerAPI.auth.dto.SignupRequest;
+import com.example.SpringBloggerAPI.exception.types.ConflictException;
 import com.example.SpringBloggerAPI.service.JwtService;
 import com.example.SpringBloggerAPI.user.User;
 import com.example.SpringBloggerAPI.user.UserRepository;
@@ -42,7 +43,7 @@ public class AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    public AuthResponse login(AuthRequest authRequest) {
+    public AuthResponse login(LoginRequest authRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
@@ -54,6 +55,14 @@ public class AuthService {
     }
 
     public AuthResponse registerUser(SignupRequest request) {
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new ConflictException("Username is already taken");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ConflictException("Email is already taken");
+        }
+
         User newUser = new User();
         newUser.setUsername(request.getUsername());
         newUser.setEmail(request.getEmail());

@@ -3,6 +3,7 @@ package com.example.SpringBloggerAPI.user;
 import com.example.SpringBloggerAPI.post.Post;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.ArrayList;
 import java.util.List;

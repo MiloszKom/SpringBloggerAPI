@@ -1,7 +1,8 @@
 package com.example.SpringBloggerAPI.auth;
 
-import com.example.SpringBloggerAPI.auth.dto.AuthRequest;
+import com.example.SpringBloggerAPI.auth.dto.LoginRequest;
 import com.example.SpringBloggerAPI.auth.dto.SignupRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,12 +15,12 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest authRequest) {
         return ResponseEntity.ok(authService.login(authRequest));
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignupRequest request) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest request) {
         return ResponseEntity.ok(authService.registerUser(request));
     }
 }

@@ -1,7 +1,5 @@
 package com.example.SpringBloggerAPI.user;
 
-import com.example.SpringBloggerAPI.comment.Comment;
-import com.example.SpringBloggerAPI.comment.dto.CommentResponse;
 import com.example.SpringBloggerAPI.user.dto.UserSummary;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +12,14 @@ public class UserService {
 
     public UserService(UserRepository repository) {
         this.repository = repository;
+    }
+
+    public boolean existsByUsername(String username) {
+        return repository.existsByUsername(username);
+    }
+
+    public boolean existsByEmail(String email) {
+        return repository.existsByEmail(email);
     }
 
     public List<UserSummary> findAll() {

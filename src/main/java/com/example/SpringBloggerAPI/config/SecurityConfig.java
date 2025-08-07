@@ -29,6 +29,9 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    @Autowired
+    private CustomAuthenticationEntryPoint authenticationEntryPoint;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -39,7 +42,9 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                     .anyRequest().authenticated())
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+             .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(authenticationEntryPoint));
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);;
 

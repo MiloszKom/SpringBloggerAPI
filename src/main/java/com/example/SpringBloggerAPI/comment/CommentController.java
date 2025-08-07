@@ -2,6 +2,7 @@ package com.example.SpringBloggerAPI.comment;
 
 import com.example.SpringBloggerAPI.comment.dto.CommentRequest;
 import com.example.SpringBloggerAPI.comment.dto.CommentResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<CommentResponse> createComment(@PathVariable int postId,
-                                                         @RequestBody CommentRequest commentRequest) {
+                                                         @Valid @RequestBody CommentRequest commentRequest) {
         CommentResponse response = commentService.createComment(postId, commentRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -33,9 +34,7 @@ public class CommentController {
 
     @GetMapping("/{commentId}")
     public ResponseEntity<CommentResponse> getComment(@PathVariable int postId, @PathVariable int commentId) {
-        System.out.println("1");
         CommentResponse response = commentService.getSingleComment(postId, commentId);
-        System.out.println("2");
         return ResponseEntity.ok(response);
     }
 

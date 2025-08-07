@@ -3,6 +3,7 @@ package com.example.SpringBloggerAPI.post;
 import com.example.SpringBloggerAPI.comment.Comment;
 import com.example.SpringBloggerAPI.user.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public class Post {
     private int id;
 
     private String title;
+
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

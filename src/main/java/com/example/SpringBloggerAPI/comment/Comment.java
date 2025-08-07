@@ -3,6 +3,9 @@ package com.example.SpringBloggerAPI.comment;
 import com.example.SpringBloggerAPI.post.Post;
 import com.example.SpringBloggerAPI.user.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "COMMENTS_TBL")

@@ -3,6 +3,7 @@ package com.example.SpringBloggerAPI.comment;
 import com.example.SpringBloggerAPI.auth.AuthService;
 import com.example.SpringBloggerAPI.comment.dto.CommentRequest;
 import com.example.SpringBloggerAPI.comment.dto.CommentResponse;
+import com.example.SpringBloggerAPI.exception.types.CommentNotFoundException;
 import com.example.SpringBloggerAPI.post.Post;
 import com.example.SpringBloggerAPI.post.PostService;
 import com.example.SpringBloggerAPI.user.User;
@@ -26,9 +27,9 @@ public class CommentService {
         this.authService = authService;
     }
 
-    private Comment getComment(int commentId) {
-        return repository.findById(commentId)
-                .orElseThrow(() -> new NoSuchElementException("Comment not found"));
+    private Comment getComment(int id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new CommentNotFoundException("Comment not found with id: " + id));
     }
 
     public CommentResponse createComment(int postId, CommentRequest commentRequest) {
@@ -65,17 +66,13 @@ public class CommentService {
     }
 
     public CommentResponse updateComment(int postId, int commentId, CommentRequest commentRequest) {
-        System.out.println("3");
         Post post = postService.getPost(postId);
         Comment comment = getComment(commentId);
-        System.out.println("4");
         if (comment.getPost().getId() != post.getId()) {
             throw new IllegalArgumentException("Comment does not belong to the specified post");
         }
-        System.out.println("5");
         comment.setContent(commentRequest.getContent());
         Comment updated = repository.save(comment);
-        System.out.println("6");
         return mapCommentToDto(updated);
     }
 
@@ -94,5 +91,4 @@ public class CommentService {
         UserSummary summary = new UserSummary(user.getId(), user.getUsername());
         return new CommentResponse(comment.getId(), comment.getContent(), summary);
     }
-
 }

@@ -1,6 +1,4 @@
-package com.example.SpringBloggerAPI.exception.types;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
+package com.example.SpringBloggerAPI.exception.responses;
 
 import java.util.List;
 

@@ -1,6 +1,7 @@
 package com.example.SpringBloggerAPI.user;
 import com.example.SpringBloggerAPI.user.dto.UserSummary;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,4 +22,16 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserSummary> getUser(@PathVariable int id) {
+        UserSummary user = service.findSingle(id);
+        return ResponseEntity.ok(user);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/grant-admin")
+    public ResponseEntity<String> grantAdminRole(@PathVariable int id) {
+        service.grantAdminRole(id);
+        return ResponseEntity.ok("Admin role granted to user with id " + id);
+    }
 }

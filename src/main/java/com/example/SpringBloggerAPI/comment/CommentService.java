@@ -4,6 +4,7 @@ import com.example.SpringBloggerAPI.auth.AuthService;
 import com.example.SpringBloggerAPI.comment.dto.CommentRequest;
 import com.example.SpringBloggerAPI.comment.dto.CommentResponse;
 import com.example.SpringBloggerAPI.exception.types.CommentNotFoundException;
+import com.example.SpringBloggerAPI.exception.types.PermissionDeniedException;
 import com.example.SpringBloggerAPI.post.Post;
 import com.example.SpringBloggerAPI.post.PostService;
 import com.example.SpringBloggerAPI.user.User;
@@ -11,7 +12,6 @@ import com.example.SpringBloggerAPI.user.dto.UserSummary;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class CommentService {
@@ -68,9 +68,18 @@ public class CommentService {
     public CommentResponse updateComment(int postId, int commentId, CommentRequest commentRequest) {
         Post post = postService.getPost(postId);
         Comment comment = getComment(commentId);
+        User currentUser = authService.getCurrentUser();
+
         if (comment.getPost().getId() != post.getId()) {
             throw new IllegalArgumentException("Comment does not belong to the specified post");
         }
+
+        boolean isOwner = comment.getUser() != null && comment.getUser().getId() == currentUser.getId();
+
+        if (!isOwner) {
+            throw new PermissionDeniedException("You are not authorized to update this comment");
+        }
+
         comment.setContent(commentRequest.getContent());
         Comment updated = repository.save(comment);
         return mapCommentToDto(updated);
@@ -79,12 +88,22 @@ public class CommentService {
     public void deleteComment(int postId, int commentId) {
         Post post = postService.getPost(postId);
         Comment comment = getComment(commentId);
+        User currentUser = authService.getCurrentUser();
+
         if (comment.getPost().getId() != post.getId()) {
             throw new IllegalArgumentException("Comment does not belong to the specified post");
         }
 
+        boolean isAdmin = authService.isAdmin(currentUser);
+        boolean isOwner = comment.getUser() != null && comment.getUser().getId() == currentUser.getId();
+
+        if (!isAdmin && !isOwner) {
+            throw new PermissionDeniedException("You are not authorized to delete this comment");
+        }
+
         repository.delete(comment);
     }
+
 
     private CommentResponse mapCommentToDto(Comment comment) {
         User user = comment.getUser();

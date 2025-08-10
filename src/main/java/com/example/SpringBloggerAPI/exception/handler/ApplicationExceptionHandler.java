@@ -1,5 +1,6 @@
 package com.example.SpringBloggerAPI.exception.handler;
 
+import com.example.SpringBloggerAPI.exception.responses.ErrorResponse;
 import com.example.SpringBloggerAPI.exception.types.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,12 @@ public class ApplicationExceptionHandler {
 
     @ExceptionHandler(CommentNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCommentId(CommentNotFoundException ex) {
+        ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidUserId(UserNotFoundException ex) {
         ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }

@@ -54,27 +54,32 @@ public class PostService {
     }
 
     public PostResponse updatePost(int id, PostRequest postRequest){
-        Post existingPost = getPost(id);
+        Post post = getPost(id);
         User current = authService.getCurrentUser();
-        if (existingPost.getUser() == null || existingPost.getUser().getId() != current.getId()) {
+        if (post.getUser() == null || post.getUser().getId() != current.getId()) {
             throw new PermissionDeniedException("You are not the owner of this post");
         }
 
-        existingPost.setTitle(postRequest.getTitle());
-        existingPost.setContent(postRequest.getContent());
+        post.setTitle(postRequest.getTitle());
+        post.setContent(postRequest.getContent());
 
-        Post updatedPost = repository.save(existingPost);
+        Post updatedPost = repository.save(post);
 
         return mapPostToDto(updatedPost);
     }
 
     public void deletePost(int id) {
-        Post existingPost = getPost(id);
-        User current = authService.getCurrentUser();
-        if (existingPost.getUser() == null || existingPost.getUser().getId() != current.getId()) {
+        Post post = getPost(id);
+        User currentUser = authService.getCurrentUser();
+
+        boolean isAdmin = authService.isAdmin(currentUser);
+        boolean isOwner =post.getUser() == null || post.getUser().getId() != currentUser.getId();
+
+        if (!isAdmin && !isOwner) {
             throw new PermissionDeniedException("You are not the owner of this post");
         }
-        repository.delete(existingPost);
+
+        repository.delete(post);
     }
 
     public PostResponse mapPostToDto(Post post) {

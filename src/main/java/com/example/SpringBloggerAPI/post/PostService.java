@@ -1,13 +1,13 @@
 package com.example.SpringBloggerAPI.post;
 
 import com.example.SpringBloggerAPI.auth.AuthService;
-import com.example.SpringBloggerAPI.comment.dto.CommentResponse;
+import com.example.SpringBloggerAPI.comment.dto.CommentDetailsDTO;
 import com.example.SpringBloggerAPI.exception.types.PermissionDeniedException;
 import com.example.SpringBloggerAPI.exception.types.PostNotFoundException;
 import com.example.SpringBloggerAPI.post.dto.PostRequest;
-import com.example.SpringBloggerAPI.post.dto.PostResponse;
+import com.example.SpringBloggerAPI.post.dto.PostDetailsDTO;
 import com.example.SpringBloggerAPI.user.User;
-import com.example.SpringBloggerAPI.user.dto.UserSummary;
+import com.example.SpringBloggerAPI.user.dto.UserSummaryDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class PostService {
                 .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + id));
     }
 
-    public PostResponse savePost(PostRequest postRequest) {
+    public PostDetailsDTO savePost(PostRequest postRequest) {
         User user = authService.getCurrentUser();
         Post post = new Post();
         post.setTitle(postRequest.getTitle());
@@ -40,7 +40,7 @@ public class PostService {
         return mapPostToDto(newPost);
     }
 
-    public List<PostResponse> getAllPosts() {
+    public List<PostDetailsDTO> getAllPosts() {
         List<Post> posts = repository.findAll();
 
         return posts.stream()
@@ -48,12 +48,12 @@ public class PostService {
                 .toList();
     }
 
-    public PostResponse getSinglePost(int id) {
+    public PostDetailsDTO getSinglePost(int id) {
         Post post =  getPost(id);
         return mapPostToDto(post);
     }
 
-    public PostResponse updatePost(int id, PostRequest postRequest){
+    public PostDetailsDTO updatePost(int id, PostRequest postRequest){
         Post post = getPost(id);
         User current = authService.getCurrentUser();
         if (post.getUser() == null || post.getUser().getId() != current.getId()) {
@@ -82,15 +82,15 @@ public class PostService {
         repository.delete(post);
     }
 
-    public PostResponse mapPostToDto(Post post) {
-        UserSummary userSummary = new UserSummary(post.getUser().getId(), post.getUser().getUsername());
+    public PostDetailsDTO mapPostToDto(Post post) {
+        UserSummaryDTO userSummaryDTO = new UserSummaryDTO(post.getUser().getId(), post.getUser().getUsername());
 
-        List<CommentResponse> comments = post.getComments().stream().map(comment -> {
+        List<CommentDetailsDTO> comments = post.getComments().stream().map(comment -> {
             User commentUser = comment.getUser();
-            UserSummary commentUserSummary = new UserSummary(commentUser.getId(), commentUser.getUsername());
-            return new CommentResponse(comment.getId(), comment.getContent(), commentUserSummary);
+            UserSummaryDTO commentUserSummaryDTO = new UserSummaryDTO(commentUser.getId(), commentUser.getUsername());
+            return new CommentDetailsDTO(comment.getId(), comment.getContent(), commentUserSummaryDTO);
         }).toList();
 
-        return new PostResponse(post.getId(), post.getTitle(), post.getContent(), userSummary, comments);
+        return new PostDetailsDTO(post.getId(), post.getTitle(), post.getContent(), userSummaryDTO, comments);
     }
 }

@@ -2,13 +2,13 @@ package com.example.SpringBloggerAPI.comment;
 
 import com.example.SpringBloggerAPI.auth.AuthService;
 import com.example.SpringBloggerAPI.comment.dto.CommentRequest;
-import com.example.SpringBloggerAPI.comment.dto.CommentResponse;
+import com.example.SpringBloggerAPI.comment.dto.CommentDetailsDTO;
 import com.example.SpringBloggerAPI.exception.types.CommentNotFoundException;
 import com.example.SpringBloggerAPI.exception.types.PermissionDeniedException;
 import com.example.SpringBloggerAPI.post.Post;
 import com.example.SpringBloggerAPI.post.PostService;
 import com.example.SpringBloggerAPI.user.User;
-import com.example.SpringBloggerAPI.user.dto.UserSummary;
+import com.example.SpringBloggerAPI.user.dto.UserSummaryDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public class CommentService {
                 .orElseThrow(() -> new CommentNotFoundException("Comment not found with id: " + id));
     }
 
-    public CommentResponse createComment(int postId, CommentRequest commentRequest) {
+    public CommentDetailsDTO createComment(int postId, CommentRequest commentRequest) {
         User user = authService.getCurrentUser();
         Post post = postService.getPost(postId);
 
@@ -46,7 +46,7 @@ public class CommentService {
         return mapCommentToDto(newComment);
     }
 
-    public List<CommentResponse> getCommentsByPost(int postId) {
+    public List<CommentDetailsDTO> getCommentsByPost(int postId) {
         Post post = postService.getPost(postId);
 
         return post.getComments().stream()
@@ -54,7 +54,7 @@ public class CommentService {
                 .toList();
     }
 
-    public CommentResponse getSingleComment(int postId, int commentId) {
+    public CommentDetailsDTO getSingleComment(int postId, int commentId) {
         Post post = postService.getPost(postId);
         Comment comment = getComment(commentId);
 
@@ -65,7 +65,7 @@ public class CommentService {
         return mapCommentToDto(comment);
     }
 
-    public CommentResponse updateComment(int postId, int commentId, CommentRequest commentRequest) {
+    public CommentDetailsDTO updateComment(int postId, int commentId, CommentRequest commentRequest) {
         Post post = postService.getPost(postId);
         Comment comment = getComment(commentId);
         User currentUser = authService.getCurrentUser();
@@ -105,9 +105,9 @@ public class CommentService {
     }
 
 
-    private CommentResponse mapCommentToDto(Comment comment) {
+    private CommentDetailsDTO mapCommentToDto(Comment comment) {
         User user = comment.getUser();
-        UserSummary summary = new UserSummary(user.getId(), user.getUsername());
-        return new CommentResponse(comment.getId(), comment.getContent(), summary);
+        UserSummaryDTO summary = new UserSummaryDTO(user.getId(), user.getUsername());
+        return new CommentDetailsDTO(comment.getId(), comment.getContent(), summary);
     }
 }

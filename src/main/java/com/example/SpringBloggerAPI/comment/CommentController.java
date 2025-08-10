@@ -1,7 +1,7 @@
 package com.example.SpringBloggerAPI.comment;
 
 import com.example.SpringBloggerAPI.comment.dto.CommentRequest;
-import com.example.SpringBloggerAPI.comment.dto.CommentResponse;
+import com.example.SpringBloggerAPI.comment.dto.CommentDetailsDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,29 +20,29 @@ public class CommentController {
     }
 
     @PostMapping
-    public ResponseEntity<CommentResponse> createComment(@PathVariable int postId,
-                                                         @Valid @RequestBody CommentRequest commentRequest) {
-        CommentResponse response = commentService.createComment(postId, commentRequest);
+    public ResponseEntity<CommentDetailsDTO> createComment(@PathVariable int postId,
+                                                           @Valid @RequestBody CommentRequest commentRequest) {
+        CommentDetailsDTO response = commentService.createComment(postId, commentRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<CommentResponse>> getCommentsByPost(@PathVariable int postId) {
-        List<CommentResponse> comments = commentService.getCommentsByPost(postId);
+    public ResponseEntity<List<CommentDetailsDTO>> getCommentsByPost(@PathVariable int postId) {
+        List<CommentDetailsDTO> comments = commentService.getCommentsByPost(postId);
         return ResponseEntity.status(HttpStatus.OK).body(comments);
     }
 
     @GetMapping("/{commentId}")
-    public ResponseEntity<CommentResponse> getComment(@PathVariable int postId, @PathVariable int commentId) {
-        CommentResponse response = commentService.getSingleComment(postId, commentId);
+    public ResponseEntity<CommentDetailsDTO> getComment(@PathVariable int postId, @PathVariable int commentId) {
+        CommentDetailsDTO response = commentService.getSingleComment(postId, commentId);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{commentId}")
-    public ResponseEntity<CommentResponse> updateComment(@PathVariable int postId,
-                                                         @PathVariable int commentId,
-                                                         @RequestBody CommentRequest commentRequest) {
-        CommentResponse updated = commentService.updateComment(postId, commentId, commentRequest);
+    public ResponseEntity<CommentDetailsDTO> updateComment(@PathVariable int postId,
+                                                           @PathVariable int commentId,
+                                                           @RequestBody CommentRequest commentRequest) {
+        CommentDetailsDTO updated = commentService.updateComment(postId, commentId, commentRequest);
         return ResponseEntity.ok(updated);
     }
 

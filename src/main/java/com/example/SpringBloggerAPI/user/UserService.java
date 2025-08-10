@@ -1,11 +1,11 @@
 package com.example.SpringBloggerAPI.user;
 
-import com.example.SpringBloggerAPI.exception.types.PostNotFoundException;
 import com.example.SpringBloggerAPI.exception.types.UserNotFoundException;
-import com.example.SpringBloggerAPI.post.Post;
+import com.example.SpringBloggerAPI.post.dto.PostSummaryDTO;
 import com.example.SpringBloggerAPI.role.Role;
 import com.example.SpringBloggerAPI.role.RoleRepository;
-import com.example.SpringBloggerAPI.user.dto.UserSummary;
+import com.example.SpringBloggerAPI.user.dto.UserDetailsDTO;
+import com.example.SpringBloggerAPI.user.dto.UserSummaryDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("Post not found with id: " + id));
     }
 
-    public List<UserSummary> findAll() {
+    public List<UserSummaryDTO> findAll() {
         List<User> users = userRepository.findAll();
 
         return users.stream()
@@ -42,9 +42,9 @@ public class UserService {
                 .toList();
     }
 
-    public UserSummary findSingle(int id) {
+    public UserDetailsDTO findSingle(int id) {
         User user = getUser(id);
-        return mapUserToDto(user);
+        return mapUserToDetailsDto(user);
     }
 
     public void grantAdminRole(int id) {
@@ -59,7 +59,20 @@ public class UserService {
         }
     }
 
-    public UserSummary mapUserToDto(User user) {
-        return new UserSummary(user.getId(), user.getUsername());
+    public UserSummaryDTO mapUserToDto(User user) {
+        return new UserSummaryDTO(user.getId(), user.getUsername());
+    }
+
+    private UserDetailsDTO mapUserToDetailsDto(User user) {
+        List<PostSummaryDTO> postSummaries = user.getPosts().stream()
+                .map(post -> new PostSummaryDTO(post.getId(), post.getTitle()))
+                .toList();
+
+        return new UserDetailsDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                postSummaries
+        );
     }
 }

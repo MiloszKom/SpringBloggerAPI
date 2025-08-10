@@ -1,5 +1,6 @@
 package com.example.SpringBloggerAPI.user;
-import com.example.SpringBloggerAPI.user.dto.UserSummary;
+import com.example.SpringBloggerAPI.user.dto.UserDetailsDTO;
+import com.example.SpringBloggerAPI.user.dto.UserSummaryDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +18,14 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserSummary>> getUsers() {
-        List<UserSummary> users = service.findAll();
+    public ResponseEntity<List<UserSummaryDTO>> getUsers() {
+        List<UserSummaryDTO> users = service.findAll();
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserSummary> getUser(@PathVariable int id) {
-        UserSummary user = service.findSingle(id);
+    public ResponseEntity<UserDetailsDTO> getUser(@PathVariable int id) {
+        UserDetailsDTO user = service.findSingle(id);
         return ResponseEntity.ok(user);
     }
 

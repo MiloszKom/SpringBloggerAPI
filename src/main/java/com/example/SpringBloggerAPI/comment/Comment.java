@@ -24,6 +24,8 @@ public class Comment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    private boolean isDeleted = false;
+
     public Comment() {}
 
     public Comment(String content, User user, Post post) {
@@ -59,4 +61,8 @@ public class Comment {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public boolean isDeleted() { return isDeleted; }
+
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
 }

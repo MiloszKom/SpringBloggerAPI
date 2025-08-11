@@ -4,9 +4,10 @@ import com.example.SpringBloggerAPI.auth.dto.LoginRequest;
 import com.example.SpringBloggerAPI.auth.dto.AuthResponse;
 import com.example.SpringBloggerAPI.auth.dto.SignupRequest;
 import com.example.SpringBloggerAPI.exception.types.ConflictException;
+import com.example.SpringBloggerAPI.exception.types.UserDeletedException;
 import com.example.SpringBloggerAPI.service.JwtService;
-import com.example.SpringBloggerAPI.role.Role;
-import com.example.SpringBloggerAPI.role.RoleRepository;
+import com.example.SpringBloggerAPI.user.role.Role;
+import com.example.SpringBloggerAPI.user.role.RoleRepository;
 import com.example.SpringBloggerAPI.user.User;
 import com.example.SpringBloggerAPI.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +56,14 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getUsername());
-        String token = jwtService.generateToken(userDetails.getUsername());
+        User user = userRepository.findByUsername(authRequest.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (user.isDeleted()) {
+            throw new UserDeletedException("This account has been deactivated");
+        }
+
+        String token = jwtService.generateToken(user.getUsername());
 
         return new AuthResponse(token);
     }
@@ -87,5 +94,9 @@ public class AuthService {
     public boolean isAdmin(User currentUser) {
         return currentUser.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
+    }
+
+    public void logoutCurrentUser() {
+        SecurityContextHolder.clearContext();
     }
 }

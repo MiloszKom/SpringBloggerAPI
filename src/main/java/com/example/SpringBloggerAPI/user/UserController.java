@@ -1,6 +1,7 @@
 package com.example.SpringBloggerAPI.user;
 import com.example.SpringBloggerAPI.user.dto.UserDetailsDTO;
 import com.example.SpringBloggerAPI.user.dto.UserSummaryDTO;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,10 @@ public class UserController {
         UserDetailsDTO user = service.findSingle(id);
         return ResponseEntity.ok(user);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable int id) { service.deleteUser(id); }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/grant-admin")

@@ -3,6 +3,7 @@ package com.example.SpringBloggerAPI.post;
 import com.example.SpringBloggerAPI.auth.AuthService;
 import com.example.SpringBloggerAPI.comment.dto.CommentDetailsDTO;
 import com.example.SpringBloggerAPI.exception.types.PermissionDeniedException;
+import com.example.SpringBloggerAPI.exception.types.PostGoneException;
 import com.example.SpringBloggerAPI.exception.types.PostNotFoundException;
 import com.example.SpringBloggerAPI.post.dto.PostRequest;
 import com.example.SpringBloggerAPI.post.dto.PostDetailsDTO;
@@ -24,8 +25,14 @@ public class PostService {
     }
 
     public Post getPost(int id) {
-        return repository.findById(id)
+        Post post = repository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + id));
+
+        if (post.isDeleted()) {
+            throw new PostGoneException("Post with id " + id + " has been deleted");
+        }
+
+        return post;
     }
 
     public PostDetailsDTO savePost(PostRequest postRequest) {
@@ -41,7 +48,7 @@ public class PostService {
     }
 
     public List<PostDetailsDTO> getAllPosts() {
-        List<Post> posts = repository.findAll();
+        List<Post> posts = repository.findByIsDeletedFalse();
 
         return posts.stream()
                 .map(this::mapPostToDto)
@@ -73,13 +80,19 @@ public class PostService {
         User currentUser = authService.getCurrentUser();
 
         boolean isAdmin = authService.isAdmin(currentUser);
-        boolean isOwner =post.getUser() == null || post.getUser().getId() != currentUser.getId();
+        boolean isOwner = post.getUser().getId() == currentUser.getId();
 
         if (!isAdmin && !isOwner) {
             throw new PermissionDeniedException("You are not the owner of this post");
         }
 
-        repository.delete(post);
+        post.setDeleted(true);
+
+        if (post.getComments() != null) {
+            post.getComments().forEach(comment -> comment.setDeleted(true));
+        }
+
+        repository.save(post);
     }
 
     public PostDetailsDTO mapPostToDto(Post post) {

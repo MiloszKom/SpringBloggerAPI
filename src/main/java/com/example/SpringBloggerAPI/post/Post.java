@@ -3,7 +3,7 @@ package com.example.SpringBloggerAPI.post;
 import com.example.SpringBloggerAPI.comment.Comment;
 import com.example.SpringBloggerAPI.user.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,10 @@ public class Post {
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Where(clause = "is_deleted = false")
     private List<Comment> comments = new ArrayList<>();
+
+    private boolean isDeleted = false;
 
     public Post() {}
 
@@ -80,4 +83,8 @@ public class Post {
         comments.remove(comment);
         comment.setPost(null);
     }
+
+    public boolean isDeleted() { return isDeleted; }
+
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
 }

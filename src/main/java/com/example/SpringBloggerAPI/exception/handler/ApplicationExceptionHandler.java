@@ -4,6 +4,7 @@ import com.example.SpringBloggerAPI.exception.responses.ErrorResponse;
 import com.example.SpringBloggerAPI.exception.types.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -13,6 +14,15 @@ import java.util.*;
 
 @RestControllerAdvice
 public class ApplicationExceptionHandler {
+
+    @ExceptionHandler({
+            PostNotFoundException.class,
+            UserNotFoundException.class,
+            CommentNotFoundException.class
+    })
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(RuntimeException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -31,46 +41,44 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(PostNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidPostId(PostNotFoundException ex) {
-        ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(CommentNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidCommentId(CommentNotFoundException ex) {
-        ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidUserId(UserNotFoundException ex) {
-        ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        ErrorResponse response = new ErrorResponse(ex.getMessage(), 400);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PermissionDeniedException.class)
-    public  ResponseEntity<ErrorResponse> handlePermissionDenied(PermissionDeniedException ex) {
-        ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.FORBIDDEN.value());
-        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    public ResponseEntity<ErrorResponse> handlePermissionDenied(PermissionDeniedException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(ConflictException.class)
-    public  ResponseEntity<ErrorResponse> handleConflictException(ConflictException ex) {
-        ErrorResponse response = new ErrorResponse(ex.getMessage(), HttpStatus.CONFLICT.value());
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    public ResponseEntity<ErrorResponse> handleConflictException(ConflictException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler({
+            PostGoneException.class,
+            CommentGoneException.class,
+            UserGoneException.class,
+            UserDeletedException.class
+    })
+    public ResponseEntity<ErrorResponse> handleGoneException(RuntimeException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.GONE);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
+        return buildErrorResponse("Invalid username or password", HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         ex.printStackTrace();
-        ErrorResponse response = new ErrorResponse("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildErrorResponse("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ResponseEntity<ErrorResponse> buildErrorResponse(String message, HttpStatus status) {
+        ErrorResponse error = new ErrorResponse(message, status.value());
+        return new ResponseEntity<>(error, status);
     }
 }

@@ -1,7 +1,7 @@
 package com.example.SpringBloggerAPI.user;
 
 import com.example.SpringBloggerAPI.post.Post;
-import com.example.SpringBloggerAPI.role.Role;
+import com.example.SpringBloggerAPI.user.role.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -36,6 +36,8 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
+
+    private boolean isDeleted = false;
 
     public User () {}
 
@@ -88,4 +90,8 @@ public class User {
     public void setPosts(List<Post> posts) {
         this.posts = posts;
     }
+
+    public boolean isDeleted() { return isDeleted; }
+
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
 }

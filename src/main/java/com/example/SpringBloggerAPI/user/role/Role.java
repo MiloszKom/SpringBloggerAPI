@@ -1,4 +1,4 @@
-package com.example.SpringBloggerAPI.role;
+package com.example.SpringBloggerAPI.user.role;
 
 import jakarta.persistence.*;
 

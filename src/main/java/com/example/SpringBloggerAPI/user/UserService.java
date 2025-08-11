@@ -1,9 +1,16 @@
 package com.example.SpringBloggerAPI.user;
 
+import com.example.SpringBloggerAPI.auth.AuthService;
+import com.example.SpringBloggerAPI.comment.CommentRepository;
+import com.example.SpringBloggerAPI.exception.types.PermissionDeniedException;
+import com.example.SpringBloggerAPI.exception.types.PostGoneException;
+import com.example.SpringBloggerAPI.exception.types.UserGoneException;
 import com.example.SpringBloggerAPI.exception.types.UserNotFoundException;
+import com.example.SpringBloggerAPI.post.Post;
+import com.example.SpringBloggerAPI.post.PostRepository;
 import com.example.SpringBloggerAPI.post.dto.PostSummaryDTO;
-import com.example.SpringBloggerAPI.role.Role;
-import com.example.SpringBloggerAPI.role.RoleRepository;
+import com.example.SpringBloggerAPI.user.role.Role;
+import com.example.SpringBloggerAPI.user.role.RoleRepository;
 import com.example.SpringBloggerAPI.user.dto.UserDetailsDTO;
 import com.example.SpringBloggerAPI.user.dto.UserSummaryDTO;
 import org.springframework.stereotype.Service;
@@ -15,10 +22,22 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final AuthService authService;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserService(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            AuthService authService,
+            PostRepository postRepository,
+            CommentRepository commentRepository
+    ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.authService = authService;
+        this.postRepository = postRepository;
+        this.commentRepository = commentRepository;
     }
 
     public boolean existsByUsername(String username) {
@@ -30,12 +49,18 @@ public class UserService {
     }
 
     public User getUser(int id) {
-        return userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Post not found with id: " + id));
+
+        if(user.isDeleted()) {
+            throw new UserGoneException("User with id " + id + " has been deleted");
+        }
+
+        return user;
     }
 
     public List<UserSummaryDTO> findAll() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findByIsDeletedFalse();
 
         return users.stream()
                 .map(this::mapUserToDto)
@@ -56,6 +81,31 @@ public class UserService {
         if (!user.getRoles().contains(adminRole)) {
             user.getRoles().add(adminRole);
             userRepository.save(user);
+        }
+    }
+
+    public void deleteUser(int id) {
+        User user = getUser(id);
+        User currentUser = authService.getCurrentUser();
+
+        boolean isAdmin = authService.isAdmin(currentUser);
+        boolean isAccountOwner = user.getId() == currentUser.getId();
+
+        if (!isAdmin && !isAccountOwner) {
+            throw new PermissionDeniedException("You are not the owner of this account");
+        }
+
+        user.setDeleted(true);
+        userRepository.save(user);
+
+        commentRepository.markCommentsDeletedByUserId(id);
+
+        commentRepository.markCommentsDeletedByPostUserId(id);
+
+        postRepository.markPostsDeletedByUserId(id);
+
+        if (isAccountOwner) {
+            authService.logoutCurrentUser();
         }
     }
 

@@ -1,10 +1,14 @@
 package com.example.SpringBloggerAPI.exception.responses;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.List;
 
 public class ErrorResponse {
     private final String message;
     private final int status;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private final List<FieldValidationError> errors;
 
     public ErrorResponse(String message, int status) {

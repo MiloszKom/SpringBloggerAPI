@@ -3,8 +3,10 @@ package com.example.SpringBloggerAPI.comment;
 import com.example.SpringBloggerAPI.auth.AuthService;
 import com.example.SpringBloggerAPI.comment.dto.CommentRequest;
 import com.example.SpringBloggerAPI.comment.dto.CommentDetailsDTO;
+import com.example.SpringBloggerAPI.exception.types.CommentGoneException;
 import com.example.SpringBloggerAPI.exception.types.CommentNotFoundException;
 import com.example.SpringBloggerAPI.exception.types.PermissionDeniedException;
+import com.example.SpringBloggerAPI.exception.types.PostGoneException;
 import com.example.SpringBloggerAPI.post.Post;
 import com.example.SpringBloggerAPI.post.PostService;
 import com.example.SpringBloggerAPI.user.User;
@@ -28,8 +30,14 @@ public class CommentService {
     }
 
     private Comment getComment(int id) {
-        return repository.findById(id)
+        Comment comment = repository.findById(id)
                 .orElseThrow(() -> new CommentNotFoundException("Comment not found with id: " + id));
+
+        if (comment.isDeleted()) {
+            throw new CommentGoneException("Comment with id " + id + " has been deleted");
+        }
+
+        return comment;
     }
 
     public CommentDetailsDTO createComment(int postId, CommentRequest commentRequest) {
@@ -95,13 +103,14 @@ public class CommentService {
         }
 
         boolean isAdmin = authService.isAdmin(currentUser);
-        boolean isOwner = comment.getUser() != null && comment.getUser().getId() == currentUser.getId();
+        boolean isOwner = comment.getUser().getId() == currentUser.getId();
 
         if (!isAdmin && !isOwner) {
             throw new PermissionDeniedException("You are not authorized to delete this comment");
         }
 
-        repository.delete(comment);
+        comment.setDeleted(true);
+        repository.save(comment);
     }
 
 

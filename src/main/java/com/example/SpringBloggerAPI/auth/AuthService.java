@@ -10,13 +10,10 @@ import com.example.SpringBloggerAPI.user.role.Role;
 import com.example.SpringBloggerAPI.user.role.RoleRepository;
 import com.example.SpringBloggerAPI.user.User;
 import com.example.SpringBloggerAPI.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,23 +23,25 @@ import java.util.List;
 @Service
 public class AuthService {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public AuthService(
+            AuthenticationManager authenticationManager,
+            JwtService jwtService,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder
+    ) {
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -73,10 +72,10 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Default role not found"));
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new ConflictException("Username is already taken");
+            throw new ConflictException("This username is already taken");
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException("Email is already taken");
+            throw new ConflictException("This email is already taken");
         }
 
         User newUser = new User();

@@ -6,6 +6,10 @@ public class CommentRequest {
     @NotBlank(message = "Content of the comment must not be empty")
     private String content;
 
+    public CommentRequest(String content) {
+        this.content = content;
+    }
+
     public String getContent() {
         return content;
     }

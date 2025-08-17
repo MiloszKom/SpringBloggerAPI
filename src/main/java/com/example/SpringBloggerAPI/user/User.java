@@ -94,4 +94,12 @@ public class User {
     public boolean isDeleted() { return isDeleted; }
 
     public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    // Constructor used only for unit testing
+    public User (int id, String username, String email, String password) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
 }

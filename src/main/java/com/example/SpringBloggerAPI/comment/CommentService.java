@@ -6,11 +6,11 @@ import com.example.SpringBloggerAPI.comment.dto.CommentDetailsDTO;
 import com.example.SpringBloggerAPI.exception.types.CommentGoneException;
 import com.example.SpringBloggerAPI.exception.types.CommentNotFoundException;
 import com.example.SpringBloggerAPI.exception.types.PermissionDeniedException;
-import com.example.SpringBloggerAPI.exception.types.PostGoneException;
 import com.example.SpringBloggerAPI.post.Post;
 import com.example.SpringBloggerAPI.post.PostService;
 import com.example.SpringBloggerAPI.user.User;
-import com.example.SpringBloggerAPI.user.dto.UserSummaryDTO;
+import com.example.SpringBloggerAPI.user.role.RoleService;
+import com.example.SpringBloggerAPI.user.role.RoleType;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +19,6 @@ import java.util.List;
 public class CommentService {
 
     private final CommentRepository repository;
-
     private final PostService postService;
     private final AuthService authService;
 
@@ -29,12 +28,12 @@ public class CommentService {
         this.authService = authService;
     }
 
-    private Comment getComment(int id) {
-        Comment comment = repository.findById(id)
-                .orElseThrow(() -> new CommentNotFoundException("Comment not found with id: " + id));
+    private Comment getComment(int commentId) {
+        Comment comment = repository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
 
         if (comment.isDeleted()) {
-            throw new CommentGoneException("Comment with id " + id + " has been deleted");
+            throw new CommentGoneException(commentId);
         }
 
         return comment;
@@ -51,14 +50,14 @@ public class CommentService {
 
         Comment newComment = repository.save(comment);
 
-        return mapCommentToDto(newComment);
+        return CommentMapper.toCommentDetailsDTO(newComment);
     }
 
     public List<CommentDetailsDTO> getCommentsByPost(int postId) {
         Post post = postService.getPost(postId);
 
         return post.getComments().stream()
-                .map(this::mapCommentToDto)
+                .map(CommentMapper::toCommentDetailsDTO)
                 .toList();
     }
 
@@ -70,7 +69,7 @@ public class CommentService {
             throw new IllegalArgumentException("Comment does not belong to the specified post");
         }
 
-        return mapCommentToDto(comment);
+        return CommentMapper.toCommentDetailsDTO(comment);
     }
 
     public CommentDetailsDTO updateComment(int postId, int commentId, CommentRequest commentRequest) {
@@ -90,7 +89,7 @@ public class CommentService {
 
         comment.setContent(commentRequest.getContent());
         Comment updated = repository.save(comment);
-        return mapCommentToDto(updated);
+        return CommentMapper.toCommentDetailsDTO(updated);
     }
 
     public void deleteComment(int postId, int commentId) {
@@ -113,10 +112,4 @@ public class CommentService {
         repository.save(comment);
     }
 
-
-    private CommentDetailsDTO mapCommentToDto(Comment comment) {
-        User user = comment.getUser();
-        UserSummaryDTO summary = new UserSummaryDTO(user.getId(), user.getUsername());
-        return new CommentDetailsDTO(comment.getId(), comment.getContent(), summary);
-    }
 }

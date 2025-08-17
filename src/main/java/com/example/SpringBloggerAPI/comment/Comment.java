@@ -62,4 +62,12 @@ public class Comment {
     public boolean isDeleted() { return isDeleted; }
 
     public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    // Constructor used only for unit testing
+    public Comment(int id, String content, User user, Post post) {
+        this.id = id;
+        this.content = content;
+        this.user = user;
+        this.post = post;
+    }
 }

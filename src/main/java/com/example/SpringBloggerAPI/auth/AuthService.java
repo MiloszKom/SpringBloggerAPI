@@ -10,6 +10,8 @@ import com.example.SpringBloggerAPI.user.role.Role;
 import com.example.SpringBloggerAPI.user.role.RoleRepository;
 import com.example.SpringBloggerAPI.user.User;
 import com.example.SpringBloggerAPI.user.UserRepository;
+import com.example.SpringBloggerAPI.user.role.RoleService;
+import com.example.SpringBloggerAPI.user.role.RoleType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,19 +30,22 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
     public AuthService(
             AuthenticationManager authenticationManager,
             JwtService jwtService,
             UserRepository userRepository,
             RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            RoleService roleService
     ) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
     }
 
     public User getCurrentUser() {
@@ -90,12 +95,13 @@ public class AuthService {
         return new AuthResponse(token);
     }
 
-    public boolean isAdmin(User currentUser) {
-        return currentUser.getRoles().stream()
-                .anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
+    public boolean isAdmin (User user) {
+        return roleService.userHasRole(user, RoleType.ADMIN);
     }
 
     public void logoutCurrentUser() {
         SecurityContextHolder.clearContext();
     }
+
+
 }

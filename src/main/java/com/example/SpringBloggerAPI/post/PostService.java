@@ -9,6 +9,8 @@ import com.example.SpringBloggerAPI.post.dto.PostRequest;
 import com.example.SpringBloggerAPI.post.dto.PostDetailsDTO;
 import com.example.SpringBloggerAPI.user.User;
 import com.example.SpringBloggerAPI.user.dto.UserSummaryDTO;
+import com.example.SpringBloggerAPI.user.role.RoleService;
+import com.example.SpringBloggerAPI.user.role.RoleType;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,20 +18,20 @@ import java.util.List;
 @Service
 public class PostService {
 
-    private final PostRepository repository;
+    private final PostRepository postRepository;
     private final AuthService authService;
 
-    public PostService(PostRepository repository, AuthService authService) {
-        this.repository = repository;
+    public PostService(PostRepository postRepository, AuthService authService) {
+        this.postRepository = postRepository;
         this.authService = authService;
     }
 
-    public Post getPost(int id) {
-        Post post = repository.findById(id)
-                .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + id));
+    public Post getPost(int postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException(postId));
 
         if (post.isDeleted()) {
-            throw new PostGoneException("Post with id " + id + " has been deleted");
+            throw new PostGoneException(postId);
         }
 
         return post;
@@ -42,22 +44,22 @@ public class PostService {
         post.setContent(postRequest.getContent());
         post.setUser(user);
 
-        Post newPost = repository.save(post);
+        Post newPost = postRepository.save(post);
 
-        return mapPostToDto(newPost);
+        return PostMapper.toPostDetailsDTO(newPost);
     }
 
     public List<PostDetailsDTO> getAllPosts() {
-        List<Post> posts = repository.findByIsDeletedFalse();
+        List<Post> posts = postRepository.findByIsDeletedFalse();
 
         return posts.stream()
-                .map(this::mapPostToDto)
+                .map(PostMapper::toPostDetailsDTO)
                 .toList();
     }
 
     public PostDetailsDTO getSinglePost(int id) {
-        Post post =  getPost(id);
-        return mapPostToDto(post);
+        Post post = getPost(id);
+        return PostMapper.toPostDetailsDTO(post);
     }
 
     public PostDetailsDTO updatePost(int id, PostRequest postRequest){
@@ -70,9 +72,9 @@ public class PostService {
         post.setTitle(postRequest.getTitle());
         post.setContent(postRequest.getContent());
 
-        Post updatedPost = repository.save(post);
+        Post updatedPost = postRepository.save(post);
 
-        return mapPostToDto(updatedPost);
+        return PostMapper.toPostDetailsDTO(updatedPost);
     }
 
     public void deletePost(int id) {
@@ -92,18 +94,6 @@ public class PostService {
             post.getComments().forEach(comment -> comment.setDeleted(true));
         }
 
-        repository.save(post);
-    }
-
-    public PostDetailsDTO mapPostToDto(Post post) {
-        UserSummaryDTO userSummaryDTO = new UserSummaryDTO(post.getUser().getId(), post.getUser().getUsername());
-
-        List<CommentDetailsDTO> comments = post.getComments().stream().map(comment -> {
-            User commentUser = comment.getUser();
-            UserSummaryDTO commentUserSummaryDTO = new UserSummaryDTO(commentUser.getId(), commentUser.getUsername());
-            return new CommentDetailsDTO(comment.getId(), comment.getContent(), commentUserSummaryDTO);
-        }).toList();
-
-        return new PostDetailsDTO(post.getId(), post.getTitle(), post.getContent(), userSummaryDTO, comments);
+        postRepository.save(post);
     }
 }

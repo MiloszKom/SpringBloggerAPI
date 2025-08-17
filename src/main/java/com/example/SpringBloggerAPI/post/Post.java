@@ -87,4 +87,12 @@ public class Post {
     public boolean isDeleted() { return isDeleted; }
 
     public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    // Constructor used only for unit testing
+    public Post(int id, String title, String content, User user) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.user = user;
+    }
 }

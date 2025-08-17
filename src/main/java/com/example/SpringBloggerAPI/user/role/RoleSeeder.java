@@ -11,8 +11,9 @@ public class RoleSeeder {
     public CommandLineRunner seedRoles(RoleRepository roleRepository) {
         return args -> {
             if (roleRepository.count() == 0) {
-                roleRepository.save(new Role("ROLE_USER"));
-                roleRepository.save(new Role("ROLE_ADMIN"));
+                for (RoleType roleType : RoleType.values()) {
+                    roleRepository.save(new Role(roleType.getRoleName()));
+                }
             }
         };
     }

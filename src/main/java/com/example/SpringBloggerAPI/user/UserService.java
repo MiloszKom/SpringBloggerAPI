@@ -9,8 +9,8 @@ import com.example.SpringBloggerAPI.exception.types.UserNotFoundException;
 import com.example.SpringBloggerAPI.post.Post;
 import com.example.SpringBloggerAPI.post.PostRepository;
 import com.example.SpringBloggerAPI.post.dto.PostSummaryDTO;
-import com.example.SpringBloggerAPI.user.role.Role;
-import com.example.SpringBloggerAPI.user.role.RoleRepository;
+import com.example.SpringBloggerAPI.user.deletion.UserDeletionHandler;
+import com.example.SpringBloggerAPI.user.role.*;
 import com.example.SpringBloggerAPI.user.dto.UserDetailsDTO;
 import com.example.SpringBloggerAPI.user.dto.UserSummaryDTO;
 import org.springframework.stereotype.Service;
@@ -21,36 +21,25 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
     private final AuthService authService;
+    private final RoleService roleService;
+    private final List<UserDeletionHandler> deletionHandlers;
 
     public UserService(
             UserRepository userRepository,
-            RoleRepository roleRepository,
             AuthService authService,
-            PostRepository postRepository,
-            CommentRepository commentRepository
+            RoleService roleService,
+            List<UserDeletionHandler> deletionHandlers
     ) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.authService = authService;
-        this.postRepository = postRepository;
-        this.commentRepository = commentRepository;
-    }
-
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
-    }
-
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+        this.roleService = roleService;
+        this.deletionHandlers = deletionHandlers;
     }
 
     public User getUser(int id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Post not found with id: " + id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
 
         if(user.isDeleted()) {
             throw new UserGoneException("User with id " + id + " has been deleted");
@@ -63,24 +52,20 @@ public class UserService {
         List<User> users = userRepository.findByIsDeletedFalse();
 
         return users.stream()
-                .map(this::mapUserToDto)
+                .map(UserMapper::toSummaryDTO)
                 .toList();
     }
 
     public UserDetailsDTO findSingle(int id) {
         User user = getUser(id);
-        return mapUserToDetailsDto(user);
+        return UserMapper.toDetailsDTO(user);
     }
 
     public void grantAdminRole(int id) {
         User user = getUser(id);
 
-        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                .orElseThrow(() -> new RuntimeException("Admin role not found"));
-
-        if (!user.getRoles().contains(adminRole)) {
-            user.getRoles().add(adminRole);
-            userRepository.save(user);
+        if (!roleService.userHasRole(user, RoleType.ADMIN)) {
+            roleService.assignRoleToUser(user, RoleType.ADMIN);
         }
     }
 
@@ -88,7 +73,7 @@ public class UserService {
         User user = getUser(id);
         User currentUser = authService.getCurrentUser();
 
-        boolean isAdmin = authService.isAdmin(currentUser);
+        boolean isAdmin = roleService.userHasRole(currentUser, RoleType.ADMIN);
         boolean isAccountOwner = user.getId() == currentUser.getId();
 
         if (!isAdmin && !isAccountOwner) {
@@ -98,31 +83,10 @@ public class UserService {
         user.setDeleted(true);
         userRepository.save(user);
 
-        commentRepository.markCommentsDeletedByUserId(id);
-
-        commentRepository.markCommentsDeletedByPostUserId(id);
-
-        postRepository.markPostsDeletedByUserId(id);
+        deletionHandlers.forEach(handler -> handler.handleUserDeletion(id));
 
         if (isAccountOwner) {
             authService.logoutCurrentUser();
         }
-    }
-
-    public UserSummaryDTO mapUserToDto(User user) {
-        return new UserSummaryDTO(user.getId(), user.getUsername());
-    }
-
-    private UserDetailsDTO mapUserToDetailsDto(User user) {
-        List<PostSummaryDTO> postSummaries = user.getPosts().stream()
-                .map(post -> new PostSummaryDTO(post.getId(), post.getTitle()))
-                .toList();
-
-        return new UserDetailsDTO(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                postSummaries
-        );
     }
 }

@@ -42,6 +42,11 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+                    .requestMatchers(
+                            "/docs",              // Swagger UI main page
+                            "/swagger-ui/**",     // supporting Swagger UI resources
+                            "/v3/api-docs/**"     // OpenAPI spec endpoints
+                    ).permitAll()
                     .anyRequest().authenticated())
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -6,12 +6,5 @@ services:
     container_name: springboot_app
     env_file:
       - .env.prod
-    environment:
-      SPRING_DATASOURCE_URL: ${DB_URL}
-      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      SPRING_SECURITY_USER_NAME: ${SPRING_SECURITY_USER_NAME}
-      SPRING_SECURITY_USER_PASSWORD: ${SPRING_SECURITY_USER_PASSWORD}
     ports:
       - "8080:8080"
-    command: sleep infinity

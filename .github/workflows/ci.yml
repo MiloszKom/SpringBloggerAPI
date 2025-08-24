@@ -38,7 +38,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t miloszk/springblogger-app:latest .
+        run: docker build -f Dockerfile.prod -t miloszk/springblogger-app:latest .
 
       - name: Push Docker image
         run: docker push miloszk/springblogger-app:latest

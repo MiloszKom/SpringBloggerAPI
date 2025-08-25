@@ -35,19 +35,13 @@ Follow these steps to run the application in **development mode**:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/<your-repo>.git
-cd <your-repo>
+git clone https://github.com/MiloszKom/SpringBloggerAPI.git
 ```
 
 ### 2. Create Environment File
 In the project root, create a file named .env.dev.
 
-You can either:
-
-Copy values from .env.dev.example (if provided), or
-
-Define your own values (e.g., database URL, username, password).
-
+Example .env.dev file:
 ```bash
 DB_URL=jdbc:postgresql://db:5432/postgres
 DB_USERNAME=postgres

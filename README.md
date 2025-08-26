@@ -3,6 +3,11 @@
 SpringBloggerAPI is a simple REST API built with Spring Boot, PostgreSQL, and Docker.
 The project simulates a minimal blogging platform with Posts, Comments, and Users, and was created to practice applying familiar backend concepts within the Spring Boot ecosystem.
 
+## 🚀 Live Demo
+👉 [SpringBloggerAPI](https://springblogger-app-latest.onrender.com/swagger-ui/index.html)
+
+The deployed version includes interactive API documentation powered by **Swagger UI**. 
+
 ## ⚙️ Tech Stack
 * Java 17 – Core language for Spring Boot
 * Spring Boot – REST API framework
